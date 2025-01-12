@@ -71,9 +71,12 @@ fun HomeScreen(
             homeUiState = viewModel.mhsUiState,
             retryAction = { viewModel.getMhs() },
             modifier = Modifier.padding(innerPadding),
-            onDetailClick = onDetailClick, onDeleteClick = {
-                viewModel.getMhs()
-            }
+
+            onDeleteClick = {
+                viewModel.deleteMhs(it)
+            },
+            onDetailClick = onDetailClick
+
         )
     }
 }
@@ -152,15 +155,15 @@ fun MhsLayout(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(mahasiswa){kontak ->
+        items(mahasiswa){mahasiswa ->
             MhsCard(
-                mahasiswa = kontak,
+                mahasiswa = mahasiswa,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onDetailClick(kontak)},
+                        onDetailClick(mahasiswa)},
                 onDeleteClick = {
-                    onDeleteClick(kontak)
+                    onDeleteClick(mahasiswa)
                 }
             )
         }

@@ -1,5 +1,6 @@
 package com.dev.firebase.ui.viewmodel
 
+import android.net.http.HttpException
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,53 +13,60 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-sealed class HomeUiState {
-    data class Success(val mahasiswa: List<Mahasiswa>) : HomeUiState()
-    data class  Error(val message: Throwable):HomeUiState()
-    object Loading : HomeUiState()
+sealed class HomeMhsUiState{
+    data class Success( val mahasiswa: List<Mahasiswa>) : HomeMhsUiState()
+    data class Error (val message: Throwable) : HomeMhsUiState()
+    object  Loading: HomeMhsUiState()
 }
 
-class HomeViewModel (private val mhs: MahasiswaRepository)
-    : ViewModel() {
-    var mhsUiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
+
+class HomeMhsViewModel(private val mhs: MahasiswaRepository) : ViewModel() {
+    var mhsUiState: HomeMhsUiState by mutableStateOf(HomeMhsUiState.Loading)
         private set
 
+
     init {
-        getMhs()
+        getMahasiswa()
     }
 
-    fun getMhs() {
+    fun getMahasiswa() {
         viewModelScope.launch {
             mhs.getMahasiswa()
-                .onStart {
-                    mhsUiState = HomeUiState.Loading
+                .onStart { mhsUiState = HomeMhsUiState.Loading
                 }
                 .catch {
-                    mhsUiState = HomeUiState.Error(it)
+                    mhsUiState = HomeMhsUiState.Error(it)
                 }
                 .collect {
                     mhsUiState = if (it.isEmpty()) {
-                        HomeUiState.Error(Exception("Belum ada daftar mahasiswa"))
-                    } else {
-                        HomeUiState.Success(it)
+                        HomeMhsUiState.Error(Exception("Data Kosong"))
+                    }
+                    else{
+                        HomeMhsUiState.Success(it)
                     }
                 }
         }
+
     }
 
-    fun deleteMhs(mahasiswa: Mahasiswa) {
+    fun deleteMahasiswa(mahasiswa: Mahasiswa) {
         viewModelScope.launch {
             try {
                 mhs.deleteMahasiswa(mahasiswa)
+
             } catch (e: Exception) {
-                mhsUiState = HomeUiState.Error(e)
+                mhsUiState = HomeMhsUiState.Error(e)
+            }
+        }
+    }
+    fun updateMahasiswa(mahasiswa: Mahasiswa) {
+        viewModelScope.launch {
+            try {
+                mhs.updateMahasiswa(mahasiswa) // Call repository to update the student
+                getMahasiswa() // Reload the updated list
+            } catch (e: Exception) {
+                mhsUiState = HomeMhsUiState.Error(e)
             }
         }
     }
 }
-
-
-
-
-
-

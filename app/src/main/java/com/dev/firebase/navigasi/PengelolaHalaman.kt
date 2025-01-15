@@ -1,14 +1,16 @@
 package com.dev.firebase.navigasi
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.dev.firebase.ui.view.HomeScreen
+import androidx.navigation.compose.rememberNavController
+
+import com.dev.firebase.ui.view.HomeMhsView
 import com.dev.firebase.ui.view.InsertMhsView
+
 
 @Composable
 fun PengelolaHalaman(
@@ -20,21 +22,36 @@ fun PengelolaHalaman(
         startDestination = DestinasiHome.route,
         modifier = Modifier
     ) {
-        composable(DestinasiHome.route) {
-            HomeScreen(
-                navigateToltemEntry = {
+        composable(
+            DestinasiHome.route
+        ) {
+            HomeMhsView(
+                navigateToItemEntry = {
                     navController.navigate(DestinasiInsert.route)
                 },
+                onDetailClick = { nim ->
+                    navController.navigate("${DestinasiDetail.route}/$nim")
+                    println("PengelolaHalaman: nim = $nim")
+                },
+                onEditClick = { nim ->
+                    navController.navigate("${DestinasiUpdate.route}/$nim")
+                    println("PengelolaHalaman: nim = $nim")
+                }
             )
         }
-
-        composable(DestinasiInsert.route) {
+        composable(
+            DestinasiInsert.route
+        ) {
             InsertMhsView(
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    navController.popBackStack()
+                },
                 onNavigate = {
                     navController.navigate(DestinasiHome.route)
                 }
             )
         }
+
+
     }
 }

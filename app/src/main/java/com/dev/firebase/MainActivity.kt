@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.dev.firebase.navigasi.PengelolaHalaman
 import com.dev.firebase.ui.theme.FirebaseTheme
-import com.dev.firebase.ui.view.HomeScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

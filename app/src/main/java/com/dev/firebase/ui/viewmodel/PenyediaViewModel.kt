@@ -9,11 +9,21 @@ import com.dev.firebase.MahasiswaApplications
 
 object PenyediaViewModel {
     val Factory = viewModelFactory {
-        initializer { HomeViewModel(aplikasiMahasiswa().container.mahasiswaRepository) }
-        initializer { InsertViewModel(aplikasiMahasiswa().container.mahasiswaRepository) }
+
+        initializer {
+            HomeMhsViewModel(
+                aplikasiMahasiswa().container.mahasiswaRepository
+            )
+        }
+        initializer {
+            InsertViewModel(
+                aplikasiMahasiswa().container.mahasiswaRepository
+            )
         }
 
+
     }
+}
 
 fun CreationExtras.aplikasiMahasiswa(): MahasiswaApplications =
     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as MahasiswaApplications)

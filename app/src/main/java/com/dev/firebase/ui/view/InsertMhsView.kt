@@ -1,5 +1,6 @@
 package com.dev.firebase.ui.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -85,7 +90,7 @@ fun InsertMhsView(
             )
         }
     ) { padding ->
-        Column(
+        Column (
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -116,7 +121,7 @@ fun InsertBodyMhs(
     homeUiState: FormState
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -129,6 +134,7 @@ fun InsertBodyMhs(
         Button(
             onClick = onClick,
             modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
             enabled = homeUiState !is FormState.Loading,
         ) {
             if (homeUiState is FormState.Loading) {
@@ -140,7 +146,7 @@ fun InsertBodyMhs(
                 )
                 Text("Loading...")
             } else {
-                Text("Add")
+                Text("Simpan")
             }
         }
     }
@@ -258,5 +264,54 @@ fun FormMahasiswa(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Text(text = errorState.angkatan ?: "", color = Color.Red)
+
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = mahasiswaEvent.judul_skripsi,
+            onValueChange = {
+                onValueChange(mahasiswaEvent.copy(judul_skripsi = it))
+            },
+            label = { Text("Judul Skripsi") },
+            isError = errorState.judul_skripsi != null,
+            placeholder = { Text("Masukkan Judul Skripsi") },
+        )
+        Text(
+            text = errorState.judul_skripsi ?: "",
+            color = Color.Red
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = mahasiswaEvent.dospem1,
+            onValueChange = {
+                onValueChange(mahasiswaEvent.copy(dospem1 = it))
+            },
+            label = { Text("Dosen Pembimbing 1") },
+            isError = errorState.dospem1 != null,
+            placeholder = { Text("Masukkan Nama Dosen Pembimbin 1") },
+        )
+        Text(
+            text = errorState.dospem1 ?: "",
+            color = Color.Red
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = mahasiswaEvent.dospem2,
+            onValueChange = {
+                onValueChange(mahasiswaEvent.copy(dospem2 = it))
+            },
+            label = { Text("Dosen Pembimbing 2") },
+            isError = errorState.dospem2 != null,
+            placeholder = { Text("Masukkan Nama Dosen Pembimbimbing 2") },
+        )
+        Text(
+            text = errorState.dospem2 ?: "",
+            color = Color.Red
+        )
+
     }
 }
+
+

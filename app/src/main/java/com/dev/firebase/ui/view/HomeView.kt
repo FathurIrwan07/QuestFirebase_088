@@ -1,6 +1,5 @@
 package com.dev.firebase.ui.view
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,12 +10,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,154 +27,153 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dev.firebase.R
 import com.dev.firebase.model.Mahasiswa
-import com.dev.firebase.ui.viewmodel.HomeUiState
-import com.dev.firebase.ui.viewmodel.HomeViewModel
+import com.dev.firebase.ui.viewmodel.HomeMhsUiState
+import com.dev.firebase.ui.viewmodel.HomeMhsViewModel
 import com.dev.firebase.ui.viewmodel.PenyediaViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-    navigateToltemEntry: () -> Unit,
+fun HomeMhsView(
+    navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit = {},
-    viewModel: HomeViewModel = viewModel(factory = PenyediaViewModel.Factory)
+    onEditClick: (String) -> Unit = {},
+    viewModel: HomeMhsViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
-
     Scaffold(
-
+        modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Home") })
+                title = { Text("Home") },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = navigateToltemEntry,
+                onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(18.dp)
-            ){
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Kontak")
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Mahasiswa")
             }
         },
-    ){ innerPadding ->
+    ) { innerPadding ->
         HomeStatus(
-            homeUiState = viewModel.mhsUiState,
-            retryAction = { viewModel.getMhs() },
+            homeMhsUiState = viewModel.mhsUiState,
+            retryAction = { viewModel.getMahasiswa() },
             modifier = Modifier.padding(innerPadding),
-
+            onDetailClick = onDetailClick,
+            onEditClick = onEditClick,
             onDeleteClick = {
-                viewModel.deleteMhs(it)
-            },
-            onDetailClick = onDetailClick
-
+                viewModel.deleteMahasiswa(it)
+            }
         )
     }
 }
 
 @Composable
 fun HomeStatus(
-    homeUiState: HomeUiState,
+    homeMhsUiState: HomeMhsUiState,
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
-    onDetailClick: (String) -> Unit,
     onDeleteClick: (Mahasiswa) -> Unit = {},
-){
-    when (homeUiState) {
-        is HomeUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
+    onDetailClick: (String) -> Unit,
+    onEditClick: (String) -> Unit,
 
-        is HomeUiState.Success ->
-            if (homeUiState.mahasiswa.isEmpty()) {
-                return Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Tidak ada data Kontak")
+    ) {
+    when (homeMhsUiState) {
+        is HomeMhsUiState.Loading -> OnLoading(modifier = modifier.fillMaxSize())
+
+        is HomeMhsUiState.Success -> {
+            if (homeMhsUiState.mahasiswa.isEmpty()) {
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Tidak ada data Mahasiswa")
                 }
             } else {
                 MhsLayout(
-                    mahasiswa = homeUiState.mahasiswa,
+                    mahasiswa = homeMhsUiState.mahasiswa,
                     modifier = modifier.fillMaxWidth(),
-                    onDetailClick = {
-                        onDetailClick(it.nim)
-                    },
-                    onDeleteClick = {
-                        onDeleteClick(it)
-                    }
+                    onDetailClick = { onDetailClick(it.nim) },
+                    onEditClick = { onEditClick(it.nim) },
+                    onDeleteClick = { onDeleteClick(it) }
                 )
             }
-        is HomeUiState.Error -> OnError(message = homeUiState.message.message?:"Error", retryAction, modifier = modifier.fillMaxSize())
+        }
+        is HomeMhsUiState.Error -> OnError(message = homeMhsUiState.message.message?: "Error",
+            retryAction,
+            modifier = Modifier.fillMaxSize())
     }
 }
-
-
 @Composable
-fun OnLoading(
-    modifier: Modifier = Modifier) {
-    Column(modifier = Modifier.fillMaxSize(),
+fun OnLoading(modifier: Modifier = Modifier) {
+    Column (modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center)
-    {
-        Text("Loading")
-    }
-
-
+        verticalArrangement = Arrangement.Center
+    ){ Text("Loading")}
 }
 
 @Composable
 fun OnError(
     message: String,
-    retryAction: () -> Unit, modifier: Modifier = Modifier) {
+    retryAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    )  {
-        Text(text = message,
-            modifier = Modifier.padding())
-
-    }
-}
-
-
-@Composable
-fun MhsLayout(
-    mahasiswa: List<Mahasiswa>,
-    modifier: Modifier = Modifier,
-    onDetailClick: (Mahasiswa) -> Unit,
-    onDeleteClick: (Mahasiswa) -> Unit = {},
-){
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(mahasiswa){mahasiswa ->
-            MhsCard(
-                mahasiswa = mahasiswa,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onDetailClick(mahasiswa)},
-                onDeleteClick = {
-                    onDeleteClick(mahasiswa)
-                }
-            )
+        Text(text = message )
+        Button(onClick = retryAction) {
+            Text(text = "Retry")
+
         }
     }
 }
 
 @Composable
+fun MhsLayout(
+    mahasiswa: List<Mahasiswa>,
+    modifier: Modifier = Modifier,
+    onDeleteClick: (Mahasiswa) -> Unit = {},
+    onDetailClick: (Mahasiswa) -> Unit,
+    onEditClick: (Mahasiswa) -> Unit = {}
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(mahasiswa) { mahasiswa ->
+            MhsCard(
+                mahasiswa = mahasiswa,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onDetailClick(mahasiswa) },
+                onDeleteClick = {
+                    onDeleteClick(mahasiswa)
+
+                }
+                ,
+                onEditClick = {
+                    onEditClick(mahasiswa)
+                }
+            )
+        }
+    }
+}
+@Composable
 fun MhsCard(
     mahasiswa: Mahasiswa,
     modifier: Modifier = Modifier,
-    onDeleteClick: (Mahasiswa) -> Unit = {}
+    onDeleteClick: (Mahasiswa) -> Unit = {},
+    onEditClick: (Mahasiswa) -> Unit = {}
 ) {
     Card(
         modifier = modifier,
@@ -182,8 +181,7 @@ fun MhsCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -192,9 +190,16 @@ fun MhsCard(
             ) {
                 Text(
                     text = mahasiswa.nama,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
+                IconButton(onClick = { onEditClick(mahasiswa) }) {
+                    Icon(
+                        imageVector = Icons.Default.Create,
+                        contentDescription = null,
+                        Modifier.padding(3.dp)
+                    )
+                }
                 IconButton(onClick = { onDeleteClick(mahasiswa) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -206,12 +211,13 @@ fun MhsCard(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+
             Text(
-                text = mahasiswa.kelas,
+                text = mahasiswa.alamat,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = mahasiswa.alamat,
+                text = mahasiswa.judul_skripsi,
                 style = MaterialTheme.typography.titleMedium
             )
         }
